@@ -18,7 +18,7 @@ try{
 
    ```java
   new ReenTrantLock(true);
-   ```
+  ```
 
   
 
@@ -33,3 +33,35 @@ try{
 - 锁的队列可以指定任意数量
 
   - 区分不同条件下的等待队列
+
+
+
+可重入的实现
+
+```java
+ // 如果线程是独占锁线程本身   state+1;   
+protected final boolean tryAcquire(int acquires) {
+    //部分代码
+ else if (current == getExclusiveOwnerThread()) {
+                int nextc = c + acquires;
+                if (nextc < 0) // overflow
+                    throw new Error("Maximum lock count exceeded");
+                setState(nextc);
+                return true;
+            }
+        }
+//释放锁 state -1
+protected final boolean tryRelease(int releases) {
+            int c = getState() - releases;
+            if (Thread.currentThread() != getExclusiveOwnerThread())
+                throw new IllegalMonitorStateException();
+            boolean free = false;
+            if (c == 0) {
+                free = true;
+                setExclusiveOwnerThread(null);
+            }
+            setState(c);
+            return free;
+        }
+```
+
